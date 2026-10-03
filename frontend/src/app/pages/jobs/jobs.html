@@ -6,4 +6,49 @@
     Browse available job opportunities.
   </p>
 
+  @if (jobs.length === 0) {
+
+    <p class="no-jobs">
+      No jobs are currently available.
+    </p>
+
+  } @else {
+
+    <div class="jobs-list">
+
+      @for (job of jobs; track job.id) {
+
+        <div class="job-card">
+
+          <h2>{{ job.title }}</h2>
+
+          <h3>{{ job.company }}</h3>
+
+          <p>
+            <strong>Location:</strong>
+            {{ job.location }}
+          </p>
+
+          <p>
+            <strong>Job Type:</strong>
+            {{ job.jobType }}
+          </p>
+
+          <p>
+            <strong>Salary:</strong>
+            {{ job.salary }}
+          </p>
+
+          <p>
+            {{ job.description }}
+          </p>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
 </div>
