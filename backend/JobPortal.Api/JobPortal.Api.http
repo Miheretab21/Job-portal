@@ -1,6 +1,21 @@
-@JobPortal.Api_HostAddress = http://localhost:5263
+@jobPortal.Api_HostAddress = http://localhost:5263
 
-GET {{JobPortal.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Get all jobs
+
+GET {{jobPortal.Api_HostAddress}}/api/jobs
 
 ###
+
+### Create a job
+
+POST {{jobPortal.Api_HostAddress}}/api/jobs
+Content-Type: application/json
+
+{
+  "title": "Junior .NET Developer",
+  "company": "ABC Technologies",
+  "location": "Addis Ababa",
+  "jobType": "Full-time",
+  "description": "We are looking for a junior .NET developer to join our development team.",
+  "salary": 15000
+}
