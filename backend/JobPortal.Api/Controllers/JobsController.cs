@@ -52,4 +52,26 @@ public class JobsController : ControllerBase
             job
         );
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateJob(int id, Job updatedJob)
+    {
+        var existingJob = await _context.Jobs.FindAsync(id);
+
+        if (existingJob == null)
+        {
+            return NotFound();
+        }
+
+        existingJob.Title = updatedJob.Title;
+        existingJob.Company = updatedJob.Company;
+        existingJob.Location = updatedJob.Location;
+        existingJob.JobType = updatedJob.JobType;
+        existingJob.Description = updatedJob.Description;
+        existingJob.Salary = updatedJob.Salary;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(existingJob);
+    }
 }

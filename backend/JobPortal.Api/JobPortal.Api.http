@@ -1,26 +1,22 @@
-@JobPortal.Api_HostAddress = http://localhost:5263
+@host = http://localhost:5263
 
 ### Get all jobs
-
-GET {{JobPortal.Api_HostAddress}}/api/jobs
+GET {{host}}/api/jobs
 
 ###
 
 ### Get job by ID
-
-GET {{JobPortal.Api_HostAddress}}/api/jobs/1
+GET {{host}}/api/jobs/1
 
 ###
 
 ### Get job that does not exist
-
-GET {{JobPortal.Api_HostAddress}}/api/jobs/999
+GET {{host}}/api/jobs/999
 
 ###
 
 ### Create a job
-
-POST {{JobPortal.Api_HostAddress}}/api/jobs
+POST {{host}}/api/jobs
 Content-Type: application/json
 
 {
@@ -30,4 +26,19 @@ Content-Type: application/json
   "jobType": "Full-time",
   "description": "We are looking for a junior .NET developer to join our development team.",
   "salary": 15000
+}
+
+###
+
+### Update job
+PUT {{host}}/api/jobs/1
+Content-Type: application/json
+
+{
+  "title": "Senior .NET Developer",
+  "company": "ABC Technologies",
+  "location": "Addis Ababa",
+  "jobType": "Full-time",
+  "description": "We are looking for an experienced .NET developer to join our backend team.",
+  "salary": 25000
 }
