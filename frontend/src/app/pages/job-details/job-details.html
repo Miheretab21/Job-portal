@@ -1,0 +1,45 @@
+<div class="job-details-page">
+
+  <div class="job-details-card">
+
+    <h1>{{ job?.title }}</h1>
+
+    <h2>{{ job?.company }}</h2>
+
+    <div class="job-info">
+
+      <p>
+        <strong>Location:</strong>
+        {{ job?.location }}
+      </p>
+
+      <p>
+        <strong>Job Type:</strong>
+        {{ job?.jobType }}
+      </p>
+
+      <p>
+        <strong>Salary:</strong>
+        {{ job?.salary }}
+      </p>
+
+      <p>
+        <strong>Posted:</strong>
+        {{ job?.postedDate | date }}
+      </p>
+
+    </div>
+
+    <div class="description">
+
+      <h3>Job Description</h3>
+
+      <p>
+        {{ job?.description }}
+      </p>
+
+    </div>
+
+  </div>
+
+</div>

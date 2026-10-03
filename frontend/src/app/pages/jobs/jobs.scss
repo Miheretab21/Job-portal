@@ -21,12 +21,27 @@
 }
 
 .job-card {
+  display: block;
+
   padding: 25px;
 
   background: white;
 
   border: 1px solid #e5e7eb;
   border-radius: 12px;
+
+  text-decoration: none;
+  color: inherit;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .job-card h2 {
@@ -42,4 +57,8 @@
 .job-card p {
   line-height: 1.6;
   color: #4b5563;
+}
+
+.no-jobs {
+  margin-top: 30px;
 }
