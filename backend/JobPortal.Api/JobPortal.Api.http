@@ -1,14 +1,26 @@
-@jobPortal.Api_HostAddress = http://localhost:5263
+@JobPortal.Api_HostAddress = http://localhost:5263
 
 ### Get all jobs
 
-GET {{jobPortal.Api_HostAddress}}/api/jobs
+GET {{JobPortal.Api_HostAddress}}/api/jobs
+
+###
+
+### Get job by ID
+
+GET {{JobPortal.Api_HostAddress}}/api/jobs/1
+
+###
+
+### Get job that does not exist
+
+GET {{JobPortal.Api_HostAddress}}/api/jobs/999
 
 ###
 
 ### Create a job
 
-POST {{jobPortal.Api_HostAddress}}/api/jobs
+POST {{JobPortal.Api_HostAddress}}/api/jobs
 Content-Type: application/json
 
 {

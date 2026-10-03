@@ -24,6 +24,19 @@ public class JobsController : ControllerBase
         return Ok(jobs);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetJob(int id)
+    {
+        var job = await _context.Jobs.FindAsync(id);
+
+        if (job == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(job);
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateJob(Job job)
     {
@@ -34,7 +47,7 @@ public class JobsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(
-            nameof(GetJobs),
+            nameof(GetJob),
             new { id = job.Id },
             job
         );
