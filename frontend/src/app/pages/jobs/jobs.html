@@ -6,17 +6,55 @@
     Browse available job opportunities.
   </p>
 
-  @if (jobs.length === 0) {
+  <div class="filters">
+
+    <input
+      type="text"
+      placeholder="Search by job title, company, or location..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearchChange()"
+    />
+
+    <select
+      [(ngModel)]="selectedJobType"
+      (change)="onJobTypeChange()"
+    >
+
+      <option value="All">
+        All Job Types
+      </option>
+
+      <option value="Full-time">
+        Full-time
+      </option>
+
+      <option value="Part-time">
+        Part-time
+      </option>
+
+      <option value="Contract">
+        Contract
+      </option>
+
+      <option value="Remote">
+        Remote
+      </option>
+
+    </select>
+
+  </div>
+
+  @if (filteredJobs.length === 0) {
 
     <p class="no-jobs">
-      No jobs are currently available.
+      No jobs match your search.
     </p>
 
   } @else {
 
     <div class="jobs-list">
 
-      @for (job of jobs; track job.id) {
+      @for (job of filteredJobs; track job.id) {
 
         <a
           class="job-card"

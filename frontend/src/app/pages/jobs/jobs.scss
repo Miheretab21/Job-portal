@@ -10,9 +10,34 @@
 }
 
 .jobs-page > p {
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   color: #6b7280;
   font-size: 18px;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 35px;
+}
+
+.filters input,
+.filters select {
+  padding: 12px 15px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  font-size: 16px;
+}
+
+.filters input {
+  flex: 1;
+}
+
+.filters select {
+  min-width: 180px;
+  background: white;
 }
 
 .jobs-list {
@@ -61,4 +86,16 @@
 
 .no-jobs {
   margin-top: 30px;
+}
+
+@media (max-width: 700px) {
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filters select {
+    width: 100%;
+  }
+
 }

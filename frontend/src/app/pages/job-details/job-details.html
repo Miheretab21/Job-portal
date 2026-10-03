@@ -40,6 +40,33 @@
 
     </div>
 
+    <div class="actions">
+
+      <button
+        type="button"
+        class="edit-button"
+        (click)="editJob()"
+      >
+        Edit Job
+      </button>
+
+      <button
+        type="button"
+        class="delete-button"
+        (click)="deleteJob()"
+        [disabled]="isDeleting"
+      >
+
+        @if (isDeleting) {
+          Deleting...
+        } @else {
+          Delete Job
+        }
+
+      </button>
+
+    </div>
+
   </div>
 
 </div>

@@ -1,0 +1,153 @@
+<div class="create-job-page">
+
+  <div class="form-card">
+
+    <h1>Create a Job</h1>
+
+    <p>
+      Add a new job opportunity to the Job Portal.
+    </p>
+
+    <form (ngSubmit)="createJob()">
+
+      <div class="form-group">
+
+        <label for="title">
+          Job Title
+        </label>
+
+        <input
+          id="title"
+          type="text"
+          name="title"
+          [(ngModel)]="job.title"
+          placeholder="e.g. Junior .NET Developer"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="company">
+          Company
+        </label>
+
+        <input
+          id="company"
+          type="text"
+          name="company"
+          [(ngModel)]="job.company"
+          placeholder="e.g. ABC Technologies"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="location">
+          Location
+        </label>
+
+        <input
+          id="location"
+          type="text"
+          name="location"
+          [(ngModel)]="job.location"
+          placeholder="e.g. Addis Ababa"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="jobType">
+          Job Type
+        </label>
+
+        <select
+          id="jobType"
+          name="jobType"
+          [(ngModel)]="job.jobType"
+          required
+        >
+
+          <option value="">
+            Select job type
+          </option>
+
+          <option value="Full-time">
+            Full-time
+          </option>
+
+          <option value="Part-time">
+            Part-time
+          </option>
+
+          <option value="Contract">
+            Contract
+          </option>
+
+          <option value="Remote">
+            Remote
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="salary">
+          Salary
+        </label>
+
+        <input
+          id="salary"
+          type="number"
+          name="salary"
+          [(ngModel)]="job.salary"
+          placeholder="e.g. 15000"
+          min="0"
+          required
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="description">
+          Job Description
+        </label>
+
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="job.description"
+          placeholder="Describe the job..."
+          rows="6"
+          required
+        ></textarea>
+
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isSubmitting"
+      >
+
+        @if (isSubmitting) {
+          Creating Job...
+        } @else {
+          Create Job
+        }
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
