@@ -42,3 +42,8 @@ Content-Type: application/json
   "description": "We are looking for an experienced .NET developer to join our backend team.",
   "salary": 25000
 }
+
+###
+
+### Delete job
+DELETE {{host}}/api/jobs/1
