@@ -1,0 +1,83 @@
+<div class="login-page">
+
+  <div class="login-card">
+
+    <h1>Welcome Back</h1>
+
+    <p class="subtitle">
+      Login to your Job Portal account.
+    </p>
+
+    @if (successMessage) {
+
+      <div class="success-message">
+        {{ successMessage }}
+      </div>
+
+    }
+
+    @if (errorMessage) {
+
+      <div class="error-message">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+    <form (ngSubmit)="login()">
+
+      <div class="form-group">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email"
+        />
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Enter your password"
+        />
+
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isSubmitting"
+      >
+
+        @if (isSubmitting) {
+          Logging in...
+        } @else {
+          Login
+        }
+
+      </button>
+
+    </form>
+
+    <p class="register-link">
+      Don't have an account?
+      <a href="/register">Create an account</a>
+    </p>
+
+  </div>
+
+</div>

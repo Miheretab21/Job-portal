@@ -5,6 +5,8 @@ import { Jobs } from './pages/jobs/jobs';
 import { JobDetails } from './pages/job-details/job-details';
 import { CreateJob } from './pages/create-job/create-job';
 import { EditJob } from './pages/edit-job/edit-job';
+import { Register } from './pages/register/register';
+import { Login } from './pages/login/login';
 
 export const routes: Routes = [
   {
@@ -32,4 +34,14 @@ export const routes: Routes = [
     title: 'Edit Job',
     component: EditJob,
   },
+  {
+  path: 'register',
+  title: 'Register',
+  component: Register,
+},
+{
+  path: 'login',
+  title: 'Login',
+  component: Login,
+},
 ];
