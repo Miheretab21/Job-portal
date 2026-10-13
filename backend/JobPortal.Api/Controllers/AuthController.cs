@@ -1,6 +1,10 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using JobPortal.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace JobPortal.Api.Controllers;
 
@@ -10,13 +14,16 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
+        SignInManager<ApplicationUser> signInManager,
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -85,10 +92,63 @@ public class AuthController : ControllerBase
             });
         }
 
+        var token = GenerateJwtToken(user);
+
         return Ok(new
         {
-            message = "Login successful."
+            message = "Login successful.",
+            token = token
         });
+    }
+
+    private string GenerateJwtToken(ApplicationUser user)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(
+                JwtRegisteredClaimNames.Sub,
+                user.Id
+            ),
+
+            new Claim(
+                JwtRegisteredClaimNames.Email,
+                user.Email ?? string.Empty
+            ),
+
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                user.Id
+            ),
+
+            new Claim(
+                ClaimTypes.Email,
+                user.Email ?? string.Empty
+            )
+        };
+
+        var key = _configuration["Jwt:Key"];
+
+        var securityKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(key!)
+        );
+
+        var credentials = new SigningCredentials(
+            securityKey,
+            SecurityAlgorithms.HmacSha256
+        );
+
+        var expirationMinutes =
+            _configuration.GetValue<int>("Jwt:ExpirationMinutes");
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
 

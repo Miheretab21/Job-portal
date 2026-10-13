@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
+
+interface AuthResponse {
+  message: string;
+  token: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -25,11 +30,27 @@ export class AuthService {
   login(request: {
     email: string;
     password: string;
-  }): Observable<{ message: string }> {
+  }): Observable<AuthResponse> {
 
-    return this.http.post<{ message: string }>(
+    return this.http.post<AuthResponse>(
       `${this.apiUrl}/login`,
       request
+    ).pipe(
+      tap(response => {
+        localStorage.setItem('token', response.token);
+      })
     );
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+  }
+
+  isLoggedIn(): boolean {
+    return this.getToken() !== null;
   }
 }
