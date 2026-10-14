@@ -8,6 +8,8 @@ import { EditJob } from './pages/edit-job/edit-job';
 import { Register } from './pages/register/register';
 import { Login } from './pages/login/login';
 
+import { authGuard } from './guards/auth-guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -28,20 +30,22 @@ export const routes: Routes = [
     path: 'create-job',
     title: 'Create Job',
     component: CreateJob,
+    canActivate: [authGuard],
   },
   {
     path: 'edit-job/:id',
     title: 'Edit Job',
     component: EditJob,
+    canActivate: [authGuard],
   },
   {
-  path: 'register',
-  title: 'Register',
-  component: Register,
-},
-{
-  path: 'login',
-  title: 'Login',
-  component: Login,
-},
+    path: 'register',
+    title: 'Register',
+    component: Register,
+  },
+  {
+    path: 'login',
+    title: 'Login',
+    component: Login,
+  },
 ];

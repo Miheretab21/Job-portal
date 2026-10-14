@@ -1,5 +1,6 @@
 using JobPortal.Api.Data;
 using JobPortal.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,8 @@ public class JobsController : ControllerBase
         _context = context;
     }
 
+    // Public endpoint: anyone can browse jobs.
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetJobs()
     {
@@ -24,6 +27,8 @@ public class JobsController : ControllerBase
         return Ok(jobs);
     }
 
+    // Public endpoint: anyone can view a job's details.
+    [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetJob(int id)
     {
@@ -37,6 +42,8 @@ public class JobsController : ControllerBase
         return Ok(job);
     }
 
+    // Protected endpoint: a valid JWT is required.
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateJob(Job job)
     {
@@ -53,6 +60,8 @@ public class JobsController : ControllerBase
         );
     }
 
+    // Protected endpoint: a valid JWT is required.
+    [Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateJob(int id, Job updatedJob)
     {
@@ -75,6 +84,8 @@ public class JobsController : ControllerBase
         return Ok(existingJob);
     }
 
+    // Protected endpoint: a valid JWT is required.
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJob(int id)
     {
