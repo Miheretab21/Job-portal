@@ -1,0 +1,98 @@
+@JobPortal.Api_HostAddress = http://localhost:5177
+
+# ==============================================================================
+# CareerOrbit API Verification & Demonstration Suite (.http)
+# NOTE: The credentials below are pre-seeded demonstration accounts for local
+# development and automated testing only. Never use these in production.
+# ==============================================================================
+
+### 1. Health Check & Database Connectivity
+GET {{JobPortal.Api_HostAddress}}/health
+Accept: application/json
+
+### 2. Search Jobs (Public Catalog with Filters)
+GET {{JobPortal.Api_HostAddress}}/api/v1/jobs?page=1&pageSize=10&isRemote=true
+Accept: application/json
+
+### 3. Dynamic Search Facets (Skills, Experience Levels, Salary Bounds)
+GET {{JobPortal.Api_HostAddress}}/api/v1/jobs/facets
+Accept: application/json
+
+### 4. Job Categories Taxonomy
+GET {{JobPortal.Api_HostAddress}}/api/v1/categories
+Accept: application/json
+
+# ==============================================================================
+# Job Seeker Workflow
+# ==============================================================================
+
+### 5. Seeker Login
+# @name seekerLogin
+POST {{JobPortal.Api_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "seeker@example.com",
+  "password": "Seeker@123456"
+}
+
+### 6. Seeker Application Tracker (Requires Seeker JWT)
+@seekerToken = {{seekerLogin.response.body.accessToken}}
+GET {{JobPortal.Api_HostAddress}}/api/v1/me/applications
+Authorization: Bearer {{seekerToken}}
+Accept: application/json
+
+### 7. Seeker Saved Jobs (Requires Seeker JWT)
+GET {{JobPortal.Api_HostAddress}}/api/v1/me/saved-jobs
+Authorization: Bearer {{seekerToken}}
+Accept: application/json
+
+# ==============================================================================
+# Employer / Recruiter Workflow
+# ==============================================================================
+
+### 8. Employer Login
+# @name employerLogin
+POST {{JobPortal.Api_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "employer@technova.com",
+  "password": "Employer@123456"
+}
+
+### 9. Employer Applicant Pipeline & AI Match Scores (Requires Employer JWT)
+@employerToken = {{employerLogin.response.body.accessToken}}
+GET {{JobPortal.Api_HostAddress}}/api/v1/employer/applicants?sortByScore=true
+Authorization: Bearer {{employerToken}}
+Accept: application/json
+
+### 10. Employer Company Profile (Requires Employer JWT)
+GET {{JobPortal.Api_HostAddress}}/api/v1/employer/company
+Authorization: Bearer {{employerToken}}
+Accept: application/json
+
+# ==============================================================================
+# Administrator Governance & Analytics Workflow
+# ==============================================================================
+
+### 11. Administrator Login
+# @name adminLogin
+POST {{JobPortal.Api_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@jobportal.com",
+  "password": "Admin@123456"
+}
+
+### 12. Admin Platform Analytics Telemetry (Requires Admin JWT)
+@adminToken = {{adminLogin.response.body.accessToken}}
+GET {{JobPortal.Api_HostAddress}}/api/v1/admin/analytics
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+### 13. Admin Moderation Job Queue (Requires Admin JWT)
+GET {{JobPortal.Api_HostAddress}}/api/v1/admin/jobs
+Authorization: Bearer {{adminToken}}
+Accept: application/json

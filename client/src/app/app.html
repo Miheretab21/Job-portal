@@ -1,0 +1,1266 @@
+<div class="app-layout">
+  <!-- Top Navigation -->
+  <app-navbar 
+    [activeTab]="activeTab()" 
+    (activeTabChange)="switchTab($event)" 
+    (openAuth)="openAuthModal($event)"
+    (openPostJob)="openPostJobModal()">
+  </app-navbar>
+
+  <!-- Real-Time Floating Notification Toast -->
+  <app-notification-toast></app-notification-toast>
+
+  <!-- VIEW 1: EXPLORE JOBS (Public / Candidate Discovery) -->
+  @if (activeTab() === 'explore') {
+    <!-- Hero Header Section -->
+    <section class="hero-section">
+      <div class="hero-container">
+        <div class="hero-badge animate-fade-in">
+          <span class="pulse-indicator"></span>
+          <span>CAREERORBIT · TALENT ACROSS EVERY INDUSTRY</span>
+        </div>
+
+        <h1 class="hero-title animate-fade-in">
+          Jobs worth <br />
+          <span class="text-gradient">applying to.</span>
+        </h1>
+
+        <p class="hero-subtitle animate-fade-in">
+          Connecting top Ethiopian talent across every industry with verified employers, transparent pay, and seamless tracking.
+        </p>
+
+        <!-- Search Command Bar (Debounced Real-Time Search) -->
+        <div class="search-command-bar glass-panel-glow animate-fade-in">
+          <div class="search-input-group">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input 
+              type="text" 
+              class="command-input" 
+              placeholder="Job title, keywords, or company..." 
+              [(ngModel)]="searchQuery" 
+              (input)="onSearchInput()"
+              (keyup.enter)="applyFilters()"
+              aria-label="Search jobs by keyword" />
+          </div>
+
+          <div class="search-divider"></div>
+
+          <div class="search-input-group location-group">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <input 
+              type="text" 
+              class="command-input" 
+              placeholder="City, 'Addis Ababa', 'Hawassa' or 'Remote'..." 
+              [(ngModel)]="locationQuery" 
+              (input)="onSearchInput()"
+              (keyup.enter)="applyFilters()"
+              aria-label="Filter by location" />
+          </div>
+
+          <button class="btn btn-primary search-btn" (click)="applyFilters()">
+            Search Jobs
+          </button>
+        </div>
+
+        <!-- Verified Platform Stats Strip -->
+        <div class="stats-strip animate-fade-in">
+          <span class="stats-item">
+            <svg class="stats-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <strong>{{ jobService.totalCount() }}</strong> Verified Roles Open Now
+          </span>
+          <span class="stats-dot">·</span>
+          <span class="stats-item"><strong>15</strong> Featured Organizations</span>
+          <span class="stats-dot">·</span>
+          <span class="stats-item">Salaries shown or marked negotiable · <strong>Deadlines on every role</strong></span>
+        </div>
+
+        <!-- Popular quick searches strip -->
+        <div class="popular-searches-row animate-fade-in">
+          <span class="pop-label">Popular:</span>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'Banking'; applyFilters()">Banking & Finance</button>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'Healthcare'; applyFilters()">Healthcare</button>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'NGO'; applyFilters()">NGO & Development</button>
+          <button type="button" class="pop-tag" (click)="setCity('Addis Ababa')">Addis Ababa</button>
+          <button type="button" class="pop-tag" (click)="setCity('Hawassa')">Hawassa</button>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'Civil Engineer'; applyFilters()">Engineering</button>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'Sales'; applyFilters()">Sales & Marketing</button>
+          <button type="button" class="pop-tag" (click)="searchQuery = 'Technology'; applyFilters()">Technology</button>
+          <button type="button" class="pop-tag" (click)="toggleRemote()">Remote</button>
+        </div>
+
+        <!-- Categories Filter Pills (Showing active categories with distinctive icons) with Scroll Hint -->
+        <div class="category-scroll-container">
+          <div class="category-pills-wrap" id="categories">
+            <button 
+              type="button"
+              class="cat-pill" 
+              [class.active]="selectedCategorySlug() === null"
+              (click)="selectCategory(null)">
+              <span class="cat-pill-icon">✨</span>
+              <span>All Categories</span>
+            </button>
+            @for (cat of jobService.categories(); track cat.id) {
+              @if (cat.jobsCount > 0) {
+                <button 
+                  type="button"
+                  class="cat-pill" 
+                  [class.active]="selectedCategorySlug() === cat.slug"
+                  [title]="cat.name"
+                  (click)="selectCategory(cat.slug)">
+                  <span class="cat-pill-icon">{{ getCategoryIcon(cat.slug) }}</span>
+                  <span>{{ cat.name }}</span>
+                  <span class="pill-count">{{ cat.jobsCount }}</span>
+                </button>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verified Partner Teams Strip -->
+    <section class="partner-teams-bar animate-fade-in" id="companies">
+      <div class="partner-container">
+        <span class="partner-label">FEATURED TEAMS · NATIONWIDE INSTITUTIONS</span>
+        <div class="partner-logos">
+          <div class="partner-brand-pill" title="EthioHeritage Bank — Commercial & Retail Banking">
+            <span class="brand-monogram bg-amber">EB</span>
+            <span class="brand-name">EthioHeritage Bank</span>
+          </div>
+          <div class="partner-brand-pill" title="Selam Care Hospital — Specialized Healthcare & Diagnostics">
+            <span class="brand-monogram bg-emerald">SC</span>
+            <span class="brand-name">Selam Care Hospital</span>
+          </div>
+          <div class="partner-brand-pill" title="Horn Development Initiative (HADI) — Humanitarian & Aid">
+            <span class="brand-monogram bg-cyan">HD</span>
+            <span class="brand-name">Horn Dev Initiative</span>
+          </div>
+          <div class="partner-brand-pill" title="Lalibela Grand Hotel & Suites — Luxury Hospitality">
+            <span class="brand-monogram bg-purple">LG</span>
+            <span class="brand-name">Lalibela Grand Hotel</span>
+          </div>
+          <div class="partner-brand-pill" title="Awash Valley Agro-Exports — Agro Commodities">
+            <span class="brand-monogram bg-emerald">AV</span>
+            <span class="brand-name">Awash Agro-Exports</span>
+          </div>
+          <div class="partner-brand-pill" title="Abay Infrastructure & Construction — Civil Engineering">
+            <span class="brand-monogram bg-amber">AC</span>
+            <span class="brand-name">Abay Construction</span>
+          </div>
+          <div class="partner-brand-pill" title="Nilewave — FinTech & Distributed Core Banking">
+            <span class="brand-monogram bg-indigo">NW</span>
+            <span class="brand-name">Nilewave FinTech</span>
+          </div>
+          <div class="partner-brand-pill" title="ebuy/Logistics — Nationwide Fulfillment & Fleet">
+            <span class="brand-monogram bg-blue">EL</span>
+            <span class="brand-name">ebuy/Logistics</span>
+          </div>
+          <div class="partner-brand-pill" title="Entoto Works — Enterprise Cloud Engineering">
+            <span class="brand-monogram bg-purple">EW</span>
+            <span class="brand-name">Entoto Works</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout Section (Aligned with Site Container) -->
+    <section class="jobs-main-section">
+      <main class="main-container" id="jobs">
+      <!-- Sidebar Filters (Sticky & Unified) -->
+      <aside class="sidebar-filters glass-panel" aria-label="Job Search Filters">
+        <div class="sidebar-header">
+          <div class="filter-header-left">
+            <h2 class="filter-title">Filters</h2>
+            @if (hasActiveFilters()) {
+              <span class="filter-count-badge">{{ activeFilterCount() }}</span>
+            }
+          </div>
+          @if (hasActiveFilters()) {
+            <button type="button" class="reset-link" (click)="resetFilters()">Clear All</button>
+          }
+        </div>
+
+        <!-- Remote Only Toggle with Badge -->
+        <div class="filter-block">
+          <label class="toggle-control">
+            <input type="checkbox" [checked]="isRemoteOnly()" (change)="toggleRemote()" aria-label="Toggle Remote Positions Only" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Remote Positions Only</span>
+            <span class="chip-count">{{ jobService.facets()?.remoteJobsCount ?? 4 }}</span>
+          </label>
+        </div>
+
+        <!-- Negotiable Salary Toggle with Badge -->
+        <div class="filter-block">
+          <label class="toggle-control">
+            <input type="checkbox" [checked]="isNegotiableOnly()" (change)="toggleNegotiableOnly()" aria-label="Toggle Negotiable Salary Roles" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Include Negotiable</span>
+            <span class="chip-count">Negotiable</span>
+          </label>
+        </div>
+
+        <!-- Currency & Compensation Range Filter -->
+        <div class="filter-block">
+          <div class="filter-label-row">
+            <h3 class="filter-label">Compensation Range</h3>
+            @if (minSalary() !== null || maxSalary() !== null || selectedCurrency() !== 'ALL') {
+              <button type="button" class="clear-section-btn" (click)="clearSalary()">Reset</button>
+            }
+          </div>
+
+          <!-- Currency Selector Toggle (All / ETB / USD) -->
+          <div class="currency-toggle-row">
+            <button 
+              type="button" 
+              class="currency-pill" 
+              [class.active]="selectedCurrency() === 'ALL'" 
+              (click)="setCurrency('ALL')">
+              All
+            </button>
+            <button 
+              type="button" 
+              class="currency-pill" 
+              [class.active]="selectedCurrency() === 'ETB'" 
+              (click)="setCurrency('ETB')">
+              ETB (/mo)
+            </button>
+            <button 
+              type="button" 
+              class="currency-pill" 
+              [class.active]="selectedCurrency() === 'USD'" 
+              (click)="setCurrency('USD')">
+              USD (/yr)
+            </button>
+          </div>
+          
+          <!-- Quick Preset Buttons & Amount Inputs (Shown only when a specific currency is chosen to avoid ambiguity) -->
+          @if (selectedCurrency() === 'ETB') {
+            <div class="salary-presets animate-fade-in">
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === null && maxSalary() === null"
+                (click)="setSalaryPreset(null, null)">
+                Any
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 30000"
+                (click)="setSalaryPreset(30000, null)">
+                30k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 50000"
+                (click)="setSalaryPreset(50000, null)">
+                50k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 80000"
+                (click)="setSalaryPreset(80000, null)">
+                80k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 140000"
+                (click)="setSalaryPreset(140000, null)">
+                140k+
+              </button>
+            </div>
+
+            <!-- Numeric Min / Max Inputs for ETB -->
+            <div class="salary-inputs-row animate-fade-in">
+              <div class="salary-field">
+                <span class="currency-symbol">ETB</span>
+                <input 
+                  type="number" 
+                  class="salary-input" 
+                  placeholder="Min" 
+                  [ngModel]="minSalary()" 
+                  (ngModelChange)="minSalary.set($event || null); onSalaryChange()"
+                  aria-label="Minimum salary in ETB" />
+              </div>
+              <span class="salary-dash">—</span>
+              <div class="salary-field">
+                <span class="currency-symbol">ETB</span>
+                <input 
+                  type="number" 
+                  class="salary-input" 
+                  placeholder="Max" 
+                  [ngModel]="maxSalary()" 
+                  (ngModelChange)="maxSalary.set($event || null); onSalaryChange()"
+                  aria-label="Maximum salary in ETB" />
+              </div>
+            </div>
+          } @else if (selectedCurrency() === 'USD') {
+            <div class="salary-presets animate-fade-in">
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === null && maxSalary() === null"
+                (click)="setSalaryPreset(null, null)">
+                Any
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 80000"
+                (click)="setSalaryPreset(80000, null)">
+                $80k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 120000"
+                (click)="setSalaryPreset(120000, null)">
+                $120k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 150000"
+                (click)="setSalaryPreset(150000, null)">
+                $150k+
+              </button>
+              <button 
+                type="button"
+                class="preset-btn" 
+                [class.active]="minSalary() === 200000"
+                (click)="setSalaryPreset(200000, null)">
+                $200k+
+              </button>
+            </div>
+
+            <!-- Numeric Min / Max Inputs for USD -->
+            <div class="salary-inputs-row animate-fade-in">
+              <div class="salary-field">
+                <span class="currency-symbol">$</span>
+                <input 
+                  type="number" 
+                  class="salary-input" 
+                  placeholder="Min" 
+                  [ngModel]="minSalary()" 
+                  (ngModelChange)="minSalary.set($event || null); onSalaryChange()"
+                  aria-label="Minimum salary in USD" />
+              </div>
+              <span class="salary-dash">—</span>
+              <div class="salary-field">
+                <span class="currency-symbol">$</span>
+                <input 
+                  type="number" 
+                  class="salary-input" 
+                  placeholder="Max" 
+                  [ngModel]="maxSalary()" 
+                  (ngModelChange)="maxSalary.set($event || null); onSalaryChange()"
+                  aria-label="Maximum salary in USD" />
+              </div>
+            </div>
+          } @else {
+            <div class="currency-hint-note animate-fade-in">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span>Select ETB or USD above to filter by salary amount</span>
+            </div>
+          }
+        </div>
+
+        <!-- Education Level Filter -->
+        <div class="filter-block">
+          <div class="filter-label-row">
+            <h3 class="filter-label">Education Level</h3>
+            @if (selectedEducationLevel()) {
+              <button type="button" class="clear-section-btn" (click)="setEducationLevel(null)">Reset</button>
+            }
+          </div>
+          <div class="pill-options-grid">
+            <button 
+              type="button" 
+              class="option-pill" 
+              [class.active]="selectedEducationLevel() === null" 
+              (click)="setEducationLevel(null)">
+              All Education Levels
+            </button>
+            <button 
+              type="button" 
+              class="option-pill" 
+              [class.active]="selectedEducationLevel() === 'Diploma'" 
+              (click)="setEducationLevel('Diploma')">
+              Diploma / TVET
+            </button>
+            <button 
+              type="button" 
+              class="option-pill" 
+              [class.active]="selectedEducationLevel() === 'Bachelor\'s'" 
+              (click)="setEducationLevel('Bachelor\'s')">
+              Bachelor's / BSc / BA
+            </button>
+            <button 
+              type="button" 
+              class="option-pill" 
+              [class.active]="selectedEducationLevel() === 'Master\'s'" 
+              (click)="setEducationLevel('Master\'s')">
+              Master's / MSc / MBA
+            </button>
+          </div>
+        </div>
+
+        <!-- City / Region Filter -->
+        <div class="filter-block">
+          <div class="filter-label-row">
+            <h3 class="filter-label">City / Region</h3>
+            @if (selectedCity()) {
+              <button type="button" class="clear-section-btn" (click)="setCity(null)">Reset</button>
+            }
+          </div>
+          <div class="city-chips-wrap">
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === null" 
+              (click)="setCity(null)">
+              All Cities
+            </button>
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === 'Addis Ababa'" 
+              (click)="setCity('Addis Ababa')">
+              Addis Ababa
+            </button>
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === 'Hawassa'" 
+              (click)="setCity('Hawassa')">
+              Hawassa
+            </button>
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === 'Bahir Dar'" 
+              (click)="setCity('Bahir Dar')">
+              Bahir Dar
+            </button>
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === 'Adama'" 
+              (click)="setCity('Adama')">
+              Adama
+            </button>
+            <button 
+              type="button" 
+              class="city-chip" 
+              [class.active]="selectedCity() === 'Dire Dawa'" 
+              (click)="setCity('Dire Dawa')">
+              Dire Dawa
+            </button>
+          </div>
+        </div>
+
+        <!-- Experience Level Multi-Select with Visible Checkboxes -->
+        <div class="filter-block">
+          <h3 class="filter-label">Experience Level</h3>
+          <div class="filter-options">
+            @for (exp of jobService.facets()?.experienceLevels; track exp.key) {
+              <button 
+                type="button"
+                class="filter-chip" 
+                [class.selected]="selectedExperienceLevels().includes(+exp.key)" 
+                [class.dimmed]="exp.count === 0"
+                [disabled]="exp.count === 0"
+                (click)="toggleExperienceLevel(+exp.key)"
+                [attr.aria-pressed]="selectedExperienceLevels().includes(+exp.key)">
+                <div class="chip-left">
+                  <span class="chip-checkbox" [class.checked]="selectedExperienceLevels().includes(+exp.key)">
+                    @if (selectedExperienceLevels().includes(+exp.key)) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    }
+                  </span>
+                  <span class="chip-label">{{ exp.label }}</span>
+                </div>
+                <span class="chip-count">{{ exp.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Employment Type Multi-Select with Visible Checkboxes -->
+        <div class="filter-block">
+          <h3 class="filter-label">Employment Type</h3>
+          <div class="filter-options">
+            @for (type of jobService.facets()?.jobTypes; track type.key) {
+              <button 
+                type="button"
+                class="filter-chip" 
+                [class.selected]="selectedJobTypes().includes(+type.key)" 
+                [class.dimmed]="type.count === 0"
+                [disabled]="type.count === 0"
+                [title]="type.count === 0 ? 'No roles currently matching' : type.label"
+                (click)="toggleJobType(+type.key)"
+                [attr.aria-pressed]="selectedJobTypes().includes(+type.key)">
+                <div class="chip-left">
+                  <span class="chip-checkbox" [class.checked]="selectedJobTypes().includes(+type.key)">
+                    @if (selectedJobTypes().includes(+type.key)) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    }
+                  </span>
+                  <span class="chip-label">{{ type.label }}</span>
+                </div>
+                <span class="chip-count">{{ type.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Tech Stack & Skills Tag Filtering (Styled Theme Chips) -->
+        <div class="filter-block">
+          <h3 class="filter-label">Skills & Competencies</h3>
+
+          <!-- Custom Skill Add Field -->
+          <div class="custom-skill-box">
+            <input 
+              type="text" 
+              class="custom-skill-input" 
+              placeholder="e.g. Kubernetes, Go, Flutter..." 
+              [(ngModel)]="customSkillInput" 
+              (keyup.enter)="addCustomSkill()"
+              aria-label="Add custom skill filter" />
+            <button type="button" class="btn-add-skill" (click)="addCustomSkill()">Add</button>
+          </div>
+
+          <!-- Selected Skill Badges -->
+          @if (selectedSkills().length > 0) {
+            <div class="active-skills-list">
+              @for (sk of selectedSkills(); track sk) {
+                <span class="active-skill-badge">
+                  <span>{{ sk }}</span>
+                  <button type="button" class="btn-remove-badge" (click)="removeSkill(sk)" aria-label="Remove skill filter">×</button>
+                </span>
+              }
+            </div>
+          }
+
+          <!-- Available Facet Skill Pills (Properly styled with design tokens) -->
+          <div class="skills-facet-pills">
+            @for (sk of jobService.facets()?.skills; track sk.key) {
+              <button 
+                type="button"
+                class="skill-mini-chip" 
+                [class.active]="selectedSkills().includes(sk.key)"
+                (click)="toggleSkill(sk.key)">
+                <span>{{ sk.label }}</span>
+                <span class="mini-count">{{ sk.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </aside>
+
+      <!-- Jobs Stream -->
+      <section class="jobs-stream">
+        <!-- Mobile Sticky Controls Bar (Filters + Sort in 1 Row, Sticky on Mobile) -->
+        <div class="mobile-sticky-controls-bar">
+          <button type="button" class="btn-mobile-filter" (click)="openMobileFilter()" aria-label="Open filter bottom sheet">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            <span class="filter-btn-text">
+              @if (hasActiveFilters()) {
+                Filters · <span class="filter-btn-count">{{ activeFilterCount() }}</span>
+              } @else {
+                Filters
+              }
+            </span>
+          </button>
+
+          <div class="mobile-sort-control">
+            <svg class="sort-icon-mobile" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M6 12h12m-9 6h6"/>
+            </svg>
+            <select class="sort-select-mobile" [value]="sortBy()" (change)="onSortChange($event)" aria-label="Sort jobs on mobile">
+              <option value="recent">Newest First</option>
+              <option value="salary_desc">Highest Pay</option>
+              <option value="salary_asc">Lowest Pay</option>
+              <option value="views">Most Popular</option>
+              <option value="deadline">Deadline</option>
+              <option value="title">Title (A-Z)</option>
+            </select>
+          </div>
+
+          @if (hasActiveFilters()) {
+            <button type="button" class="btn-mobile-clear-mini" (click)="resetFilters()" title="Clear all active filters" aria-label="Clear all filters">
+              ✕
+            </button>
+          }
+        </div>
+
+        <div class="stream-header">
+          <div class="count-box">
+            <h2 class="stream-title">Available Positions</h2>
+            <span class="results-count">{{ jobService.totalCount() }} roles currently open</span>
+          </div>
+
+          <div class="sort-box">
+            <span class="sort-label">Sort by:</span>
+            <select class="sort-select" [value]="sortBy()" (change)="onSortChange($event)" aria-label="Sort jobs">
+              <option value="recent">Newest First</option>
+              <option value="salary_desc">Highest Compensation</option>
+              <option value="salary_asc">Lowest Compensation</option>
+              <option value="views">Most Popular / Views</option>
+              <option value="deadline">Application Deadline</option>
+              <option value="title">Job Title (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Active Filters Summary Bar -->
+        @if (hasActiveFilters()) {
+          <div class="active-filters-bar glass-panel animate-fade-in">
+            <div class="active-filters-chips">
+              <span class="active-filters-heading">Active Filters:</span>
+              
+              @if (searchQuery.trim()) {
+                <span class="filter-tag-chip">
+                  <span>Keyword: "{{ searchQuery }}"</span>
+                  <button type="button" class="btn-chip-remove" (click)="searchQuery = ''; applyFilters()">×</button>
+                </span>
+              }
+
+              @if (locationQuery.trim()) {
+                <span class="filter-tag-chip">
+                  <span>Location: "{{ locationQuery }}"</span>
+                  <button type="button" class="btn-chip-remove" (click)="locationQuery = ''; applyFilters()">×</button>
+                </span>
+              }
+
+              @if (selectedCategorySlug()) {
+                <span class="filter-tag-chip">
+                  <span>Category: {{ selectedCategorySlug() }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="selectCategory(null)">×</button>
+                </span>
+              }
+
+              @if (isRemoteOnly()) {
+                <span class="filter-tag-chip">
+                  <span>Remote Only</span>
+                  <button type="button" class="btn-chip-remove" (click)="toggleRemote()">×</button>
+                </span>
+              }
+
+              @if (isNegotiableOnly()) {
+                <span class="filter-tag-chip">
+                  <span>Salary: Negotiable</span>
+                  <button type="button" class="btn-chip-remove" (click)="toggleNegotiableOnly()">×</button>
+                </span>
+              }
+
+              @if (selectedEducationLevel()) {
+                <span class="filter-tag-chip">
+                  <span>Edu: {{ selectedEducationLevel() }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="setEducationLevel(null)">×</button>
+                </span>
+              }
+
+              @if (selectedCity()) {
+                <span class="filter-tag-chip">
+                  <span>City: {{ selectedCity() }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="setCity(null)">×</button>
+                </span>
+              }
+
+              @if (selectedCurrency() !== 'ALL') {
+                <span class="filter-tag-chip">
+                  <span>Currency: {{ selectedCurrency() }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="setCurrency('ALL')">×</button>
+                </span>
+              }
+
+              @if (minSalary() !== null || maxSalary() !== null) {
+                <span class="filter-tag-chip">
+                  <span>Salary: {{ selectedCurrency() === 'ETB' ? 'ETB ' : '$' }}{{ minSalary() ? (minSalary()! / 1000) + 'k' : '0' }} — {{ selectedCurrency() === 'ETB' ? 'ETB ' : '$' }}{{ maxSalary() ? (maxSalary()! / 1000) + 'k' : 'Any' }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="clearSalary()">×</button>
+                </span>
+              }
+
+              @for (sk of selectedSkills(); track sk) {
+                <span class="filter-tag-chip">
+                  <span>Skill: {{ sk }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="removeSkill(sk)">×</button>
+                </span>
+              }
+
+              @for (exp of selectedExperienceLevels(); track exp) {
+                <span class="filter-tag-chip">
+                  <span>Level: {{ getExperienceLevelLabel(exp) }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="removeExperienceLevel(exp)">×</button>
+                </span>
+              }
+
+              @for (tp of selectedJobTypes(); track tp) {
+                <span class="filter-tag-chip">
+                  <span>Type: {{ getJobTypeLabel(tp) }}</span>
+                  <button type="button" class="btn-chip-remove" (click)="removeJobType(tp)">×</button>
+                </span>
+              }
+            </div>
+
+            <button type="button" class="btn-clear-all" (click)="resetFilters()">
+              Clear All ({{ activeFilterCount() }})
+            </button>
+          </div>
+        }
+
+        @if (jobService.loading()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <span>Discovering verified opportunities...</span>
+          </div>
+        } @else if (jobService.jobs().length === 0) {
+          <div class="empty-state glass-panel">
+            <div class="empty-icon">🔍</div>
+            <h3>No positions match your criteria</h3>
+            <p>Try clearing filters or search terms to see all available roles.</p>
+            <button type="button" class="btn btn-secondary mt-2" (click)="resetFilters()">Clear Filters</button>
+          </div>
+        } @else {
+          <div class="jobs-grid">
+            @for (job of jobService.jobs(); track job.id) {
+              <app-job-card 
+                [job]="job" 
+                (selectJob)="jobService.selectJob($event)"
+                (requestAuth)="openAuthModal('login')">
+              </app-job-card>
+            }
+          </div>
+
+          <!-- Pagination / Load More Footer -->
+          @if (jobService.totalCount() > jobService.jobs().length) {
+            <div class="load-more-box animate-fade-in">
+              <button type="button" class="btn btn-secondary load-more-btn" (click)="loadMoreJobs()">
+                Load More Positions ({{ jobService.totalCount() - jobService.jobs().length }} remaining)
+              </button>
+            </div>
+          }
+        }
+      </section>
+    </main>
+  </section>
+
+    <!-- HOW IT WORKS SECTION (Icons, Prominent Step Numbers) -->
+    <section class="steps-section" id="how-it-works">
+      <div class="steps-container">
+        <div class="steps-header">
+          <span class="section-eyebrow">HOW IT WORKS</span>
+          <h2 class="steps-title">From profile to offer in three steps.</h2>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card glass-panel">
+            <div class="step-top-row">
+              <div class="step-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+              </div>
+              <span class="step-num">01</span>
+            </div>
+            <div class="step-line"></div>
+            <h3 class="step-heading">Build one profile</h3>
+            <p class="step-desc">Upload your CV once. Add skills, education and projects so verified employers see the complete picture.</p>
+          </div>
+
+          <div class="step-card glass-panel">
+            <div class="step-top-row">
+              <div class="step-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <span class="step-num">02</span>
+            </div>
+            <div class="step-line"></div>
+            <h3 class="step-heading">Get matched by skill</h3>
+            <p class="step-desc">Roles are ranked with our AI engine against your skills and preferences, with pay ranges shown up front.</p>
+          </div>
+
+          <div class="step-card glass-panel">
+            <div class="step-top-row">
+              <div class="step-icon-wrap">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m12 15 2 2 4-4"/>
+                  <rect width="18" height="18" x="3" y="3" rx="2"/>
+                  <path d="M3 9h18"/>
+                  <path d="M9 21V9"/>
+                </svg>
+              </div>
+              <span class="step-num">03</span>
+            </div>
+            <div class="step-line"></div>
+            <h3 class="step-heading">Apply and track</h3>
+            <p class="step-desc">Apply in one step, track your pipeline real-time, and follow every application from submitted to decision.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DUAL HIGH-IMPACT FEATURE CALLOUT CARDS -->
+    <section class="callout-section" id="for-employers">
+      <div class="callout-container">
+        <!-- Candidate Card -->
+        <div class="callout-card callout-card-candidate">
+          <div class="callout-badge-row">
+            <span class="callout-tag">FOR CANDIDATES</span>
+          </div>
+          <h3 class="callout-heading">Apply with confidence.</h3>
+          <ul class="callout-checklist">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Skill-based AI matching with transparent fit scores</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Live application tracking and instant status alerts</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Verified company employers and vetted pay ranges</span>
+            </li>
+          </ul>
+          <button type="button" class="btn callout-action-btn candidate-btn" (click)="openAuthModal('register')">
+            Create Profile
+          </button>
+        </div>
+
+        <!-- Employer Card -->
+        <div class="callout-card callout-card-employer">
+          <div class="callout-badge-row">
+            <span class="callout-tag">FOR EMPLOYERS</span>
+          </div>
+          <h3 class="callout-heading">Hire without the inbox.</h3>
+          <ul class="callout-checklist">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Interactive Kanban pipeline from Reviewing to Hired</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Automated AI ATS Compatibility scoring & skill gap breakdown</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Verified company profile & direct applicant email review</span>
+            </li>
+          </ul>
+          <button type="button" class="btn callout-action-btn employer-btn" (click)="auth.isEmployer() ? isPostJobModalOpen.set(true) : openAuthModal('register')">
+            Post a Job
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUST, SOCIAL PROOF & FAQ SECTION -->
+    <section class="trust-faq-section">
+      <div class="trust-container">
+        <!-- Testimonial Quote -->
+        <div class="testimonial-card glass-panel animate-fade-in">
+          <div class="testimonial-eyebrow-row">
+            <span class="sample-testimonial-badge">Sample Testimonial · Demo Scenario</span>
+          </div>
+          <div class="quote-mark">“</div>
+          <p class="quote-text">
+            CareerOrbit transformed how we recruit certified talent across Ethiopia. From credit risk analysts and clinic supervisors to systems leads, the upfront salary visibility and instant applicant pipelines helped us fill 8 critical roles across Addis Ababa and Hawassa.
+          </p>
+          <div class="quote-author">
+            <div class="author-avatar">EH</div>
+            <div class="author-info">
+              <span class="author-name">Selamawit Bekele</span>
+              <span class="author-role">Talent Acquisition Director · EthioHeritage Financial Group</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive FAQ Accordion -->
+        <div class="faq-card glass-panel animate-fade-in">
+          <h3 class="faq-title">Frequently Asked Questions</h3>
+
+          <div class="faq-item" [class.open]="openFaqIndex() === 0">
+            <button type="button" class="faq-question" (click)="toggleFaq(0)">
+              <span>How does CareerOrbit verify companies and compensation?</span>
+              <span class="faq-icon">{{ openFaqIndex() === 0 ? '−' : '+' }}</span>
+            </button>
+            @if (openFaqIndex() === 0) {
+              <div class="faq-answer">
+                Every employer on CareerOrbit must submit valid business registration documents (e.g. Ethiopian Ministry of Trade license or international incorporation). Salaries are either published in upfront ranges (ETB for domestic roles, USD for international roles) or explicitly marked negotiable, with 100% verified vacancy counts.
+              </div>
+            }
+          </div>
+
+          <div class="faq-item" [class.open]="openFaqIndex() === 1">
+            <button type="button" class="faq-question" (click)="toggleFaq(1)">
+              <span>Are roles open to both Ethiopian professionals and global talent?</span>
+              <span class="faq-icon">{{ openFaqIndex() === 1 ? '−' : '+' }}</span>
+            </button>
+            @if (openFaqIndex() === 1) {
+              <div class="faq-answer">
+                Yes! We spotlight top Ethiopian technology hubs (Addis Ababa, Kazanchis, Bole) alongside worldwide remote roles from international companies hiring African and global software engineering, product, and design leaders.
+              </div>
+            }
+          </div>
+
+          <div class="faq-item" [class.open]="openFaqIndex() === 2">
+            <button type="button" class="faq-question" (click)="toggleFaq(2)">
+              <span>How does the AI ATS compatibility score work?</span>
+              <span class="faq-icon">{{ openFaqIndex() === 2 ? '−' : '+' }}</span>
+            </button>
+            @if (openFaqIndex() === 2) {
+              <div class="faq-answer">
+                Our embedded AI scoring engine analyzes candidate CVs, required skills, and work experience against the job's requirements to generate an objective match percentage (0–100%), skill gap analysis, and tailored recruiter recommendation.
+              </div>
+            }
+          </div>
+
+          <div class="faq-item" [class.open]="openFaqIndex() === 3">
+            <button type="button" class="faq-question" (click)="toggleFaq(3)">
+              <span>Is CareerOrbit free for job seekers?</span>
+              <span class="faq-icon">{{ openFaqIndex() === 3 ? '−' : '+' }}</span>
+            </button>
+            @if (openFaqIndex() === 3) {
+              <div class="faq-answer">
+                Yes, 100% free forever for candidates. You can build a profile, generate your AI fit analysis, apply in one click, track your pipeline real-time, and chat directly with hiring managers without fees.
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Visible Direct Contact Strip -->
+        <div class="contact-strip glass-panel animate-fade-in">
+          <div class="contact-content">
+            <div class="contact-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <div class="contact-text">
+              <strong>Need employer onboarding or have platform questions?</strong>
+              <span>Reach our team directly at <a href="mailto:support@careerorbit.et">support@careerorbit.et</a> or call <a href="tel:+251116610000"><strong>+251 11 661 0000</strong></a> (Addis Ababa).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- VIEW 2: SEEKER APPLICATIONS TRACKER -->
+  @if (activeTab() === 'applications') {
+    <app-applications-tracker (exploreJobs)="switchTab('explore')"></app-applications-tracker>
+  }
+
+  <!-- VIEW 3: SEEKER SAVED ROLES -->
+  @if (activeTab() === 'saved') {
+    <app-saved-jobs 
+      (selectJob)="jobService.selectJob($event)" 
+      (exploreJobs)="switchTab('explore')">
+    </app-saved-jobs>
+  }
+
+  <!-- VIEW 4: EMPLOYER MANAGEMENT DASHBOARD -->
+  @if (activeTab() === 'employer-dashboard') {
+    <app-employer-dashboard 
+      (openPostJob)="openPostJobModal()" 
+      (openEditJob)="openEditJobModal($event)"
+      (viewPipeline)="viewPipelineForJob($event)"
+      (exploreJobs)="switchTab('explore')"
+      (selectJob)="jobService.selectJob($event)">
+    </app-employer-dashboard>
+  }
+
+  <!-- VIEW 5: EMPLOYER CANDIDATE PIPELINE KANBAN -->
+  @if (activeTab() === 'candidate-pipeline') {
+    <app-candidate-pipeline 
+      (backToDashboard)="switchTab('employer-dashboard')">
+    </app-candidate-pipeline>
+  }
+
+  <!-- VIEW 6: PLATFORM ADMIN & GOVERNANCE DASHBOARD -->
+  @if (activeTab() === 'admin') {
+    <app-admin-dashboard></app-admin-dashboard>
+  }
+
+  <!-- Job Detail Modal (Candidate View) -->
+  @if (jobService.selectedJob(); as selected) {
+    <app-job-detail-modal 
+      [job]="selected" 
+      (close)="jobService.clearSelectedJob()"
+      (requestAuth)="openAuthModal('login')"
+      (goToTracker)="switchTab('applications')">
+    </app-job-detail-modal>
+  }
+
+  <!-- Post / Edit a Job Modal (Employer View) -->
+  @if (isPostJobModalOpen()) {
+    <app-post-job-modal 
+      [editJobId]="editingJobId()"
+      (close)="closePostJobModal()">
+    </app-post-job-modal>
+  }
+
+  <!-- Auth Modal -->
+  @if (authModalTab(); as tab) {
+    <app-auth-modal 
+      [initialTab]="tab" 
+      (close)="closeAuthModal()">
+    </app-auth-modal>
+  }
+
+  <!-- Mobile Filter Bottom Sheet Overlay -->
+  @if (isMobileFilterOpen()) {
+    <div class="bottom-sheet-overlay" (click)="closeMobileFilter()"></div>
+    <div class="bottom-sheet-container glass-panel-glow animate-fade-in" (click)="$event.stopPropagation()">
+      <div class="sheet-header">
+        <div class="sheet-title-row">
+          <h3 class="sheet-title">Filter Roles</h3>
+          @if (hasActiveFilters()) {
+            <span class="filter-count-badge">{{ activeFilterCount() }}</span>
+          }
+        </div>
+        <div class="sheet-actions-row">
+          @if (hasActiveFilters()) {
+            <button type="button" class="reset-link" (click)="resetFilters()">Clear All</button>
+          }
+          <button type="button" class="sheet-close-btn" (click)="closeMobileFilter()" aria-label="Close filter sheet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sheet-body">
+        <!-- Remote Only Toggle -->
+        <div class="sheet-block">
+          <label class="toggle-control">
+            <input type="checkbox" [checked]="isRemoteOnly()" (change)="toggleRemote()" aria-label="Toggle Remote Positions Only" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Remote Positions Only</span>
+            <span class="chip-count">{{ jobService.facets()?.remoteJobsCount ?? 4 }}</span>
+          </label>
+        </div>
+
+        <!-- Negotiable Salary Toggle -->
+        <div class="sheet-block">
+          <label class="toggle-control">
+            <input type="checkbox" [checked]="isNegotiableOnly()" (change)="toggleNegotiableOnly()" aria-label="Toggle Negotiable Salary Roles" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Include Negotiable</span>
+            <span class="chip-count">Negotiable</span>
+          </label>
+        </div>
+
+        <!-- Currency & Compensation Range -->
+        <div class="sheet-block">
+          <div class="filter-label-row">
+            <h4 class="filter-label">Compensation Range</h4>
+            @if (minSalary() !== null || maxSalary() !== null || selectedCurrency() !== 'ALL') {
+              <button type="button" class="clear-section-btn" (click)="clearSalary()">Reset</button>
+            }
+          </div>
+
+          <div class="currency-toggle-row">
+            <button type="button" class="currency-pill" [class.active]="selectedCurrency() === 'ALL'" (click)="setCurrency('ALL')">All</button>
+            <button type="button" class="currency-pill" [class.active]="selectedCurrency() === 'ETB'" (click)="setCurrency('ETB')">ETB (/mo)</button>
+            <button type="button" class="currency-pill" [class.active]="selectedCurrency() === 'USD'" (click)="setCurrency('USD')">USD (/yr)</button>
+          </div>
+
+          <!-- Quick Preset Buttons & Amount Inputs (Shown only when a specific currency is chosen to avoid ambiguity) -->
+          @if (selectedCurrency() === 'ETB') {
+            <div class="salary-presets animate-fade-in">
+              <button type="button" class="preset-btn" [class.active]="minSalary() === null && maxSalary() === null" (click)="setSalaryPreset(null, null)">Any</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 30000" (click)="setSalaryPreset(30000, null)">30k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 50000" (click)="setSalaryPreset(50000, null)">50k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 80000" (click)="setSalaryPreset(80000, null)">80k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 140000" (click)="setSalaryPreset(140000, null)">140k+</button>
+            </div>
+
+            <div class="salary-inputs-row animate-fade-in">
+              <div class="salary-field">
+                <span class="currency-symbol">ETB</span>
+                <input type="number" class="salary-input" placeholder="Min" [ngModel]="minSalary()" (ngModelChange)="minSalary.set($event || null); onSalaryChange()" aria-label="Minimum salary in ETB" />
+              </div>
+              <span class="salary-dash">—</span>
+              <div class="salary-field">
+                <span class="currency-symbol">ETB</span>
+                <input type="number" class="salary-input" placeholder="Max" [ngModel]="maxSalary()" (ngModelChange)="maxSalary.set($event || null); onSalaryChange()" aria-label="Maximum salary in ETB" />
+              </div>
+            </div>
+          } @else if (selectedCurrency() === 'USD') {
+            <div class="salary-presets animate-fade-in">
+              <button type="button" class="preset-btn" [class.active]="minSalary() === null && maxSalary() === null" (click)="setSalaryPreset(null, null)">Any</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 80000" (click)="setSalaryPreset(80000, null)">$80k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 120000" (click)="setSalaryPreset(120000, null)">$120k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 150000" (click)="setSalaryPreset(150000, null)">$150k+</button>
+              <button type="button" class="preset-btn" [class.active]="minSalary() === 200000" (click)="setSalaryPreset(200000, null)">$200k+</button>
+            </div>
+
+            <div class="salary-inputs-row animate-fade-in">
+              <div class="salary-field">
+                <span class="currency-symbol">$</span>
+                <input type="number" class="salary-input" placeholder="Min" [ngModel]="minSalary()" (ngModelChange)="minSalary.set($event || null); onSalaryChange()" aria-label="Minimum salary in USD" />
+              </div>
+              <span class="salary-dash">—</span>
+              <div class="salary-field">
+                <span class="currency-symbol">$</span>
+                <input type="number" class="salary-input" placeholder="Max" [ngModel]="maxSalary()" (ngModelChange)="maxSalary.set($event || null); onSalaryChange()" aria-label="Maximum salary in USD" />
+              </div>
+            </div>
+          } @else {
+            <div class="currency-hint-note animate-fade-in">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <span>Select ETB or USD above to filter by salary amount</span>
+            </div>
+          }
+        </div>
+
+        <!-- Education Level Filter -->
+        <div class="sheet-block">
+          <div class="filter-label-row">
+            <h4 class="filter-label">Education Level</h4>
+            @if (selectedEducationLevel()) {
+              <button type="button" class="clear-section-btn" (click)="setEducationLevel(null)">Reset</button>
+            }
+          </div>
+          <div class="pill-options-grid">
+            <button type="button" class="option-pill" [class.active]="selectedEducationLevel() === null" (click)="setEducationLevel(null)">All Education Levels</button>
+            <button type="button" class="option-pill" [class.active]="selectedEducationLevel() === 'Diploma'" (click)="setEducationLevel('Diploma')">Diploma / TVET</button>
+            <button type="button" class="option-pill" [class.active]="selectedEducationLevel() === 'Bachelor\'s'" (click)="setEducationLevel('Bachelor\'s')">Bachelor's / BSc / BA</button>
+            <button type="button" class="option-pill" [class.active]="selectedEducationLevel() === 'Master\'s'" (click)="setEducationLevel('Master\'s')">Master's / MSc / MBA</button>
+          </div>
+        </div>
+
+        <!-- City / Region Filter -->
+        <div class="sheet-block">
+          <div class="filter-label-row">
+            <h4 class="filter-label">City / Region</h4>
+            @if (selectedCity()) {
+              <button type="button" class="clear-section-btn" (click)="setCity(null)">Reset</button>
+            }
+          </div>
+          <div class="city-chips-wrap">
+            <button type="button" class="city-chip" [class.active]="selectedCity() === null" (click)="setCity(null)">All Cities</button>
+            <button type="button" class="city-chip" [class.active]="selectedCity() === 'Addis Ababa'" (click)="setCity('Addis Ababa')">Addis Ababa</button>
+            <button type="button" class="city-chip" [class.active]="selectedCity() === 'Hawassa'" (click)="setCity('Hawassa')">Hawassa</button>
+            <button type="button" class="city-chip" [class.active]="selectedCity() === 'Bahir Dar'" (click)="setCity('Bahir Dar')">Bahir Dar</button>
+            <button type="button" class="city-chip" [class.active]="selectedCity() === 'Adama'" (click)="setCity('Adama')">Adama</button>
+            <button type="button" class="city-chip" [class.active]="selectedCity() === 'Dire Dawa'" (click)="setCity('Dire Dawa')">Dire Dawa</button>
+          </div>
+        </div>
+
+        <!-- Experience Level -->
+        <div class="sheet-block">
+          <h4 class="filter-label">Experience Level</h4>
+          <div class="filter-options">
+            @for (exp of jobService.facets()?.experienceLevels; track exp.key) {
+              <button type="button" class="filter-chip" [class.selected]="selectedExperienceLevels().includes(+exp.key)" [class.dimmed]="exp.count === 0" [disabled]="exp.count === 0" (click)="toggleExperienceLevel(+exp.key)" [attr.aria-pressed]="selectedExperienceLevels().includes(+exp.key)">
+                <div class="chip-left">
+                  <span class="chip-checkbox" [class.checked]="selectedExperienceLevels().includes(+exp.key)">
+                    @if (selectedExperienceLevels().includes(+exp.key)) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    }
+                  </span>
+                  <span class="chip-label">{{ exp.label }}</span>
+                </div>
+                <span class="chip-count">{{ exp.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Employment Type -->
+        <div class="sheet-block">
+          <h4 class="filter-label">Employment Type</h4>
+          <div class="filter-options">
+            @for (type of jobService.facets()?.jobTypes; track type.key) {
+              <button type="button" class="filter-chip" [class.selected]="selectedJobTypes().includes(+type.key)" [class.dimmed]="type.count === 0" [disabled]="type.count === 0" (click)="toggleJobType(+type.key)" [attr.aria-pressed]="selectedJobTypes().includes(+type.key)">
+                <div class="chip-left">
+                  <span class="chip-checkbox" [class.checked]="selectedJobTypes().includes(+type.key)">
+                    @if (selectedJobTypes().includes(+type.key)) {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    }
+                  </span>
+                  <span class="chip-label">{{ type.label }}</span>
+                </div>
+                <span class="chip-count">{{ type.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Tech Stack & Skills -->
+        <div class="sheet-block">
+          <h4 class="filter-label">Skills & Competencies</h4>
+          <div class="custom-skill-box">
+            <input type="text" class="custom-skill-input" placeholder="e.g. Flutter, Go..." [(ngModel)]="customSkillInput" (keyup.enter)="addCustomSkill()" aria-label="Add custom skill" />
+            <button type="button" class="btn-add-skill" (click)="addCustomSkill()">Add</button>
+          </div>
+          @if (selectedSkills().length > 0) {
+            <div class="active-skills-list">
+              @for (sk of selectedSkills(); track sk) {
+                <span class="active-skill-badge">
+                  <span>{{ sk }}</span>
+                  <button type="button" class="btn-remove-badge" (click)="removeSkill(sk)">×</button>
+                </span>
+              }
+            </div>
+          }
+          <div class="skills-facet-pills">
+            @for (sk of jobService.facets()?.skills; track sk.key) {
+              <button type="button" class="skill-mini-chip" [class.active]="selectedSkills().includes(sk.key)" (click)="toggleSkill(sk.key)">
+                <span>{{ sk.label }}</span>
+                <span class="mini-count">{{ sk.count }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <button type="button" class="btn btn-secondary sheet-cancel-btn" (click)="closeMobileFilter()">Cancel</button>
+        <button type="button" class="btn btn-primary sheet-apply-btn" (click)="applyMobileFilter()">
+          Apply Filters ({{ jobService.totalCount() }} roles)
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

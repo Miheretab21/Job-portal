@@ -1,0 +1,76 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL 18 Relational Database
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:18-alpine
+    container_name: careerorbit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jobportal_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-jobportal_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - careerorbit-network
+
+  # ----------------------------------------------------------------------------
+  # 2. ASP.NET Core 10 LTS Backend API (.NET 10, EF Core 10, Minimal APIs)
+  # ----------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: careerorbit-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-jobportal_db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-root};Include Error Detail=true"
+      JwtSettings__Secret: "${JWT_SECRET:?JWT_SECRET is required. Copy .env.example to .env and configure a secure key}"
+      JwtSettings__Issuer: "${JWT_ISSUER:-JobPortalApi}"
+      JwtSettings__Audience: "${JWT_AUDIENCE:-JobPortalClient}"
+      JwtSettings__AccessTokenExpirationMinutes: "${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-60}"
+      JwtSettings__RefreshTokenExpirationDays: "${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:-7}"
+    ports:
+      - "5177:8080"
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - careerorbit-network
+
+  # ----------------------------------------------------------------------------
+  # 3. Angular 22 Client (Zoneless, Signals, NGINX Reverse Proxy)
+  # ----------------------------------------------------------------------------
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: careerorbit-client
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "4200:80"
+    networks:
+      - careerorbit-network
+
+volumes:
+  pgdata:
+    driver: local
+  uploads:
+    driver: local
+
+networks:
+  careerorbit-network:
+    driver: bridge
