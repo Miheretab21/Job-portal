@@ -11,6 +11,46 @@
 
 ---
 
+## 📸 Platform Preview & User Interface Showcase
+
+Experience the sleek obsidian aesthetic, modern glassmorphism, real-time reactive Angular 22 Signals, and high-conviction workflows across job seekers, employers, and administrators:
+
+### 1. 🔍 Job Discovery, Command Search & Industry Facets
+> *Real-time keystroke search with debouncing, verified active vacancy counts, and Ethiopian industry taxonomy chips.*
+
+![Job Discovery and Command Search](docs/screenshots/01_hero_search.png)
+
+---
+
+### 2. 🏛️ Nationwide Catalog & Faceted Multi-Filter Sidebar
+> *Explore verified positions across nationwide institutions (`EthioHeritage Bank`, `Nilewave FinTech`, `Selam Care Hospital`, `Awash Agro-Exports`) with dual ETB/USD compensation toggles, education levels, cities, and tech skills.*
+
+![Job Catalog with Faceted Sidebar Filters](docs/screenshots/02_job_catalog_filters.png)
+
+---
+
+### 3. 📄 Interactive Role Breakdown & Ethiopian Market Compensation Modal
+> *Deep-dive job modal featuring verified Ethiopian institutions (`EthioHeritage Bank`, Financial District Addis Ababa), transparent ETB salary ranges, language competencies (Amharic & English), and comprehensive role benefits.*
+
+![Job Details and Application Modal](docs/screenshots/03_job_details_modal.png)
+
+---
+
+### 4. 👥 Recruiter Candidate Review Pipeline (Kanban)
+> *Interactive applicant pipeline across 6 review stages (`Submitted` → `In Review` → `Shortlisted` → `Interview` → `Hired / Offer` → `Declined`) with automated AI ATS compatibility scoring (`⚡ 95% Match`), CV review, and recruiter feedback notes.*
+
+![Employer Candidate Pipeline Kanban](docs/screenshots/04_employer_pipeline.png)
+
+---
+
+### 5. 🛡️ Platform Administration & Real-Time Governance
+> *Executive governance console displaying live PostgreSQL 18 & .NET 10 LTS system beacons, member breakdown metrics, active requisition analytics, and real-time activity streams.*
+
+![Platform Administration and Telemetry](docs/screenshots/05_admin_telemetry.png)
+
+
+---
+
 ## 🏛️ System Architecture
 
 CareerOrbit strictly implements **Clean Architecture** with inward-pointing domain dependencies, ensuring domain logic remains decoupled from frameworks, databases, and client rendering engines:
